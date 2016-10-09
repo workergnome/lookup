@@ -60,8 +60,9 @@ class MyApp < Sinatra::Base
   get "/context" do
 
     cache_control :public
+    content_type "application/ld+json"
     etag Digest::SHA1.hexdigest(settings.context.to_json)
-    json settings.context
+    settings.context.to_json
 
 
       
