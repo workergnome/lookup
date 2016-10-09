@@ -8,13 +8,15 @@ gem "linkeddata"
 ## Redis
 gem 'redis'
 
-## Gems for Sintatra
+## Gems for Rack
 gem "rack"
 gem "rack-cache"
 gem 'redis-rack-cache'
+gem 'rack-cors', :require => 'rack/cors'
+
+## Gems for Sintatra
 gem "sinatra"
 gem "sinatra-contrib"
-gem "sinatra-cross_origin", "~> 0.3.1"
 gem "typhoeus"
 gem 'puma'
 

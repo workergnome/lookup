@@ -2,7 +2,6 @@ require 'rack'
 require 'rack/cache'
 require 'redis-rack-cache'
 
-require './site/app'
 
 redis_uri = ENV["REDIS_URL"] || "localhost:6379"
 
@@ -11,5 +10,16 @@ use Rack::Cache,
   entitystore: "redis://#{redis_uri}/0/metastore",
   verbose:     true,
   default_ttl: 60*24*7
+
+require "rack/cors"
+
+use Rack::Cors do
+  allow do
+    origins '*'
+    resource '*', :headers => :any, :methods => [:get, :options, :head]
+  end
+end
+
+require './site/app'
 
 run MyApp

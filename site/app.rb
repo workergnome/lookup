@@ -6,7 +6,7 @@ require 'digest/sha1'
 require 'sinatra/base'
 require "sinatra/reloader" 
 require "sinatra/json"
-require 'sinatra/cross_origin'
+
 
 # # Internal Libraries
 # require "./lib/plant_uml_encode64.rb"
@@ -58,7 +58,7 @@ class MyApp < Sinatra::Base
   end
 
   get "/context" do
-    cross_origin
+
     cache_control :public
     etag Digest::SHA1.hexdigest(settings.context.to_json)
     json settings.context
