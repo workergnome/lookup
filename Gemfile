@@ -14,6 +14,7 @@ gem "rack-cache"
 gem 'redis-rack-cache'
 gem "sinatra"
 gem "sinatra-contrib"
+gem "sinatra-cross_origin", "~> 0.3.1"
 gem "typhoeus"
 gem 'puma'
 
