@@ -80,7 +80,7 @@ class MyApp < Sinatra::Base
 
     cache_control :public
     etag Digest::SHA1.hexdigest(temp_object.to_json)
-    headers "Link" => "<#{request.host_with_port}/context>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+    headers "Link" => "<//#{request.host_with_port}/context>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
     puts "request.host_with_port: #{request.host_with_port}"
 
     json temp_object
