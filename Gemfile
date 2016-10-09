@@ -5,6 +5,9 @@ source 'http://rubygems.org'
 ## Linked Data Gems
 gem "linkeddata"
 
+## Redis
+gem 'redis'
+
 ## Gems for Sintatra
 gem "rack"
 gem "rack-cache"

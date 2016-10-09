@@ -4,9 +4,11 @@ require 'redis-rack-cache'
 
 require './site/app'
 
+redis_uri = ENV["REDIS_URL"] || "localhost:6379"
+
 use Rack::Cache,
-  metastore:   'redis://localhost:6379/0/metastore',
-  entitystore: 'redis://localhost:6379/0/metastore',
+  metastore:   "redis://#{redis_uri}/0/metastore",
+  entitystore: "redis://#{redis_uri}/0/metastore",
   verbose:     true,
   default_ttl: 60*24*7
 

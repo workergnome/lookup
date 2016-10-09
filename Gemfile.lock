@@ -226,6 +226,7 @@ DEPENDENCIES
   puma
   rack
   rack-cache
+  redis
   redis-rack-cache
   sinatra
   sinatra-contrib
