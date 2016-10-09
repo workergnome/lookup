@@ -9,7 +9,8 @@ use Rack::Cache,
   metastore:   "redis://#{redis_uri}/0/metastore",
   entitystore: "redis://#{redis_uri}/0/metastore",
   verbose:     true,
-  default_ttl: 60*24*7
+  default_ttl: 60*24*7,
+  allow_reload: true
 
 require "rack/cors"
 

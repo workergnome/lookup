@@ -64,11 +64,27 @@ class MyApp < Sinatra::Base
     json settings.context
 
 
-      # "label":       "Couture, Thomas",
-      # "id":          "http://vocab.getty.edu/ulan/500115403",
-      # "source":      "http://vocab.getty.edu/ulan/",
-      # "agent":       "http://vocab.getty.edu/ulan/500115403-agent",
-      # "website":     "http://www.getty.edu/vow/ULANFullDisplay?find=&subjectid=500115403"
+      
+
+  end
+
+  get "/getty" do
+
+    temp_object = {
+        "label": "Couture, Thomas",
+           "id": "http://vocab.getty.edu/ulan/500115403",
+       "source": "http://vocab.getty.edu/ulan/",
+        "agent": "http://vocab.getty.edu/ulan/500115403-agent",
+      "website": "http://www.getty.edu/vow/ULANFullDisplay?find=&subjectid=500115403"
+    }
+
+    cache_control :public
+    etag Digest::SHA1.hexdigest(temp_object.to_json)
+    headers "Link" => "<#{request.host_with_port}/context>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+    puts "request.host_with_port: #{request.host_with_port}"
+
+    json temp_object
+
 
   end
 
