@@ -58,15 +58,16 @@ class MyApp < Sinatra::Base
   end
 
   get "/context" do
-
     cache_control :public
-    content_type "application/ld+json"
     etag Digest::SHA1.hexdigest(settings.context.to_json)
+
+    if request.accept? "application/ld+json"
+      content_type "application/ld+json"
+    else
+      content_type "application/json"
+    end
+    
     settings.context.to_json
-
-
-      
-
   end
 
   get "/getty" do
@@ -85,7 +86,6 @@ class MyApp < Sinatra::Base
     puts "request.host_with_port: #{request.host_with_port}"
 
     json temp_object
-
 
   end
 

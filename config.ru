@@ -17,7 +17,7 @@ require "rack/cors"
 use Rack::Cors do
   allow do
     origins '*'
-    resource '*', :headers => :any, :methods => [:get, :options, :head]
+    resource '*', :headers => :any, :methods => [:get, :options, :head], expose: ['ETag', "Link"]
   end
 end
 
