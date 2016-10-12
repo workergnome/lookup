@@ -9,6 +9,10 @@ require "sinatra/json"
 
 require 'sparql/client'
 
+require "linkeddata"
+
+
+require_relative "../lib/getty_query.rb"
 
 
 # # Internal Libraries
@@ -27,41 +31,8 @@ class MyApp < Sinatra::Base
   configure do 
     set :getty_sparql, SPARQL::Client.new("http://vocab.getty.edu/sparql")
 
-    set :context, <<~eos
-      {
-        "@context": { 
-          "skos":    "http://www.w3.org/2004/02/skos/core#",
-          "foaf":   "http://xmlns.com/foaf/0.1/",
-          "schema":  "http://schema.org/",
-          "label":   "skos:prefLabel",
-          "id":      "@id",
-          "source": {
-            "@id":   "skos:inScheme",
-            "@type": "@id"
-          },
-          "agent":  {
-            "@id":   "foaf:focus",
-            "@type": "@id"
-          }, 
-          "website": {
-            "@id":   "schema:url",
-            "@type": "@id"
-          }
-        }
-      }
-      eos
-
-    set :frame, <<~eos
-      {
-        "@explicit": true,
-        "@context": #{JSON.parse(settings.context)['@context'].to_json},
-        "label":  {},
-        "id": {},  
-        "source": {},
-        "agent":  {},
-        "website": {}
-      }
-  eos
+    set :context, File.read("data/context.json")
+    set :frame, File.read("data/frame.json")
   end
  
 
@@ -105,61 +76,24 @@ class MyApp < Sinatra::Base
 
   get "/getty/:id" do
 
-    query = "
-      PREFIX skos:   <http://www.w3.org/2004/02/skos/core#>
-      PREFIX foaf:   <http://xmlns.com/foaf/0.1/>
-      PREFIX schema: <http://schema.org/>
-      PREFIX dc:     <http://purl.org/dc/elements/1.1/>
-      PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
+    cache_control :public, max_age: 86400
 
+    querier = GettyQuery.new(settings.getty_sparql)
 
-      CONSTRUCT {
-        ?entity skos:prefLabel ?label ;
-                skos:inScheme  ?scheme ;
-                foaf:focus     ?agent ;
-                schema:url     ?website .
-      }
-      WHERE {
-        ?entity dc:identifier  \"#{params[:id]}\" ; 
-                skos:prefLabel ?label .
-        OPTIONAL {
-          ?entity skos:inScheme  ?scheme ;
-        }
-        OPTIONAL {
-          ?entity foaf:focus   ?agent .
-        }
-        OPTIONAL {
-          {
-            ?entity schema:url ?website.
-          } UNION {
-            ?entity rdfs:seeAlso ?website.
-          }
-        }
-      }
-    "
+    ### THE RIGHT WAY TO DO IT
+    # graph = querier.get_graph(params[:id])
+    # unframed_json = JSON::LD::API::fromRdf(graph)
+    # frame = JSON.parse(settings.frame)
+    # json_results = JSON::LD::API.frame(unframed_json, frame)
+    # result = json_results["@graph"]
 
-    result = settings.getty_sparql.query(query)
+    ### THE WRONG WAY TO DO IT
+    result = querier.get_obj(params[:id])
 
-    result.each_statement do |statement|
-      puts statement.inspect
-    end
-
-
-    temp_object = {
-        "label": "Couture, Thomas",
-           "id": "http://vocab.getty.edu/ulan/500115403",
-       "source": "http://vocab.getty.edu/ulan/",
-        "agent": "http://vocab.getty.edu/ulan/500115403-agent",
-      "website": "http://www.getty.edu/vow/ULANFullDisplay?find=&subjectid=500115403"
-    }
-
-
-    cache_control :public
-    etag Digest::SHA1.hexdigest(temp_object.to_json)
+    etag Digest::SHA1.hexdigest(result.to_json)
     headers "Link" => "<http://#{request.host_with_port}/context>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
 
-    json temp_object
-
+    json result
   end
 
 end
