@@ -43,7 +43,7 @@ class MyApp < Sinatra::Base
   get "/" do
     "
     <h1> Entity Lookup Service </h1>
-    <p> This project will provide basic RDF information about an entity. Currently, it only supports the Getty Vocabularies, but additional services will soon be added.
+    <p> This provides basic RDF information about an entity, suitable for embedding into a graph when an entity is reconciled.
     <h2> Example URLs </h2>
     <ul>
       <li> <a href='/getty/500012368.json'> /getty/500012368.json (as JSON-LD)</a>
