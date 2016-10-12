@@ -91,12 +91,8 @@ class MyApp < Sinatra::Base
 
     cache_control :public, max_age: 86400
 
-    querier = GettyQuery.new(settings.getty_sparql)
-
-    case params[:format]
-
     # Handle Content Negotiation
-    when nil
+    if params[:format].nil?
       request.accept.each do |accept_obj|
         case accept_obj.to_s
         when"application/ld+json", "application/json"
@@ -109,12 +105,19 @@ class MyApp < Sinatra::Base
       end
       # default to JSON
       redirect to("#{request.url}.json"), 303
-    
+    end
 
+
+    querier = GettyQuery.new(settings.getty_sparql)
+
+    case params[:format]
+    
     # Handle JSON-LD
     when "json"  
 
       ### THE RIGHT WAY TO DO IT
+      ### (Does not work.  See https://github.com/ruby-rdf/json-ld/issues/30)
+
       # graph = querier.get_graph(params[:id])
       # unframed_json = JSON::LD::API::fromRdf(graph)
       # frame = JSON.parse(settings.frame)
@@ -139,10 +142,6 @@ class MyApp < Sinatra::Base
       graph = querier.get_graph(params[:id])
       graph.dump(:rdfxml)         
     end
-
-
-
-
   end
 
 end
