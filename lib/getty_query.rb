@@ -30,6 +30,7 @@ class GettyQuery
             ?entity rdfs:seeAlso ?website.
           }
         }
+        FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), \"en\"))
       }
     "
 
@@ -59,6 +60,7 @@ class GettyQuery
             ?id rdfs:seeAlso ?website.
           }
         }
+        FILTER(LANG(?label) = \"\" || LANGMATCHES(LANG(?label), \"en\"))
       }
     "
 
@@ -73,7 +75,7 @@ class GettyQuery
     results = @client.query(query)
 
     # Replace the arrays with literals if there is only one obj in the array
-    results.bindings.inject({}) { |h, (k, v)| h[k] = v.count == 1 ? v.first : v; h }
+    results.bindings.inject({}) { |h, (k, v)| h[k] = v.uniq.count == 1 ? v.first : v; h }
 
   end
 
