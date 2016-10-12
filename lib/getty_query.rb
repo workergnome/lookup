@@ -41,13 +41,13 @@ class GettyQuery
       PREFIX dc:     <http://purl.org/dc/elements/1.1/>
       PREFIX rdfs:   <http://www.w3.org/2000/01/rdf-schema#>
 
-      SELECT ?label ?id ?scheme ?agent ?website 
+      SELECT ?label ?id ?source ?agent ?website 
       
       WHERE {
         ?id dc:identifier  \"ID_VALUE_GOES_HERE\" ; 
                 skos:prefLabel ?label .
         OPTIONAL {
-          ?id skos:inScheme  ?scheme ;
+          ?id skos:inScheme  ?source ;
         }
         OPTIONAL {
           ?id foaf:focus ?agent .
