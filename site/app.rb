@@ -46,7 +46,8 @@ class MyApp < Sinatra::Base
     <p> This provides basic RDF information about an entity, suitable for embedding into a graph when an entity is reconciled.
     <h2> Example URLs </h2>
     <ul>
-      <li> <a href='/getty/500012368.json'> /getty/500012368.json (as JSON-LD)</a>
+      <li> <a href='/getty/500012368.json'> /getty/500012368.json (as JSON, with JSON-LD header)</a>
+      <li> <a href='/getty/500012368.jsonld'> /getty/500012368.json (as JSON-LD with context)</a>
       <li> <a href='/getty/500012368.rdf'> /getty/500012368.rdf  (as RDF/XML)</a>
       <li> <a href='/getty/500012368.ttl'> /getty/500012368.ttl (As Turtle)</a>
       <li> <a href='/getty/500012368'> /getty/500012368 (using content negotiation)</a>
@@ -107,39 +108,38 @@ class MyApp < Sinatra::Base
       redirect to("#{request.url}.json"), 303
     end
 
+    # Make the Query
+    graph = GettyQuery.new(settings.getty_sparql).get_graph(params[:id])
 
-    querier = GettyQuery.new(settings.getty_sparql)
-
+    # Handle various formats
     case params[:format]
-    
-    # Handle JSON-LD
-    when "json"  
 
-      ### THE RIGHT WAY TO DO IT
-      ### (Does not work.  See https://github.com/ruby-rdf/json-ld/issues/30)
+    when "jsonld"
+      unframed_json = JSON::LD::API::fromRdf(graph)
+      frame = JSON.parse(settings.frame)
+      json_results = JSON::LD::API.frame(unframed_json, frame)
 
-      # graph = querier.get_graph(params[:id])
-      # unframed_json = JSON::LD::API::fromRdf(graph)
-      # frame = JSON.parse(settings.frame)
-      # json_results = JSON::LD::API.frame(unframed_json, frame)
-      # result = json_results["@graph"]
-      # 
-      ### THE WRONG WAY TO DO IT
-      result = querier.get_obj(params[:id])
+      content_type "application/ld+json"
+      json_results.to_json
+    when "json"
 
       headers "Link" => "<http://#{request.host_with_port}/context>; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
-      json result
-    
+
+      unframed_json = JSON::LD::API::fromRdf(graph)
+      frame = JSON.parse(settings.frame)
+      json_results = JSON::LD::API.frame(unframed_json, frame)
+      
+      json json_results["@graph"].count == 1 ? json_results["@graph"].first : json_results["@graph"]
+
+
     # Handle Turtle
     when "ttl"
       content_type "text/turtle"
-      graph = querier.get_graph(params[:id])
       graph.dump(:turtle)  
 
     # Handle RDF/XML  
     when "rdf"
       content_type "application/rdf+xml"
-      graph = querier.get_graph(params[:id])
       graph.dump(:rdfxml)         
     end
   end
